@@ -52,7 +52,7 @@ This sets s_lastTimeStamp to the timestamp at the moment of contract deployment.
 
 **EIP-191 and EIP-712: Verifying Signatures in Contracts**
 
----
+
 
 **Why Do We Need Them?**
 
@@ -60,7 +60,7 @@ This sets s_lastTimeStamp to the timestamp at the moment of contract deployment.
 - **Security:** EIP-712 helps prevent replay attacks by including domain-specific metadata.
 - **Sponsored transactions:** EIP-191 enables sending transactions on behalf of a user using their signature.
 
----
+
 
 **EIP-191: Basic Structure**
 
@@ -175,3 +175,59 @@ Analogy: The Hotel
 - Facets: Various hotel services (e.g., room service, cleaning).
 - Function Selector Mapping: How requests are routed to the correct service.
 - Shared Storage: Shared hotel resources (e.g., a centralized guest database).
+
+## Week of December 9, 2024
+
+### **Transaction Types**
+
+#### **ZKsync**
+
+##### **Transaction Type 113 (0x71 Typed Structure Data)**
+
+- **EIP-712**  
+- Enables access to ZKsync features like account abstraction.  
+- Smart contracts must be deployed using a type 113 transaction.  
+- **Added fields**:
+  - `gasPerPubData`: Max gas a sender is willing to pay for a single byte of pubdata (L2 state data submitted to L1).
+  - `customSignature`: Custom signature field for when the signer's account is not an EOA.
+  - `paymasterParams`: Parameters for configuring a custom paymaster.
+  - `factory_deps`: Bytecode of the smart contract being deployed.
+
+##### **Transaction Type 5 (0xff Priority Transactions)**
+
+- For L1 → L2 transactions.
+
+#### **Ethereum and ZKsync**
+
+##### **Transaction Type 0 (Legacy Transactions)**
+
+- Used in Foundry with the `--legacy` flag.  
+- Format used before the introduction of transaction types.
+
+##### **Transaction Type 1 (0x01 Transactions)**
+
+- Addressed contract breakage risks from **EIP-2929**.  
+- Same fields as legacy transactions but with an additional `accessList` parameter:
+  - Contains an array of addresses and storage keys.  
+  - Saves gas on cross-contract calls by predeclaring allowed contracts and storage slots.
+
+##### **Transaction Type 2 (0x02 Transactions)**
+
+- Introduced in **EIP-1559** during the London Fork.  
+- Handles congestion and high fees.  
+- Replaced `gasPrice` with `baseFee`.  
+- **Added fields**:
+  - `maxPriorityFeePerGas`: Max fee the user is willing to pay for priority.
+  - `maxFeePerGas`: Max total fee (`maxPriorityFeePerGas` + `baseFee`).  
+
+> ZKsync supports type 2 transactions, but it ignores the maxFee parameters.
+
+##### **Transaction Type 3 (0x03 Blob Transactions)**
+
+- Introduced in **EIP-4844** during the Dencun Fork.  
+- Scaling solution for rollups.  
+- **Added fields**:
+  - `max_blob_fee_per_gas`: Max fee per gas for blob gas, separate from regular gas.
+  - `blob_versioned_hashes`: List of versioned blob hashes associated with the transaction’s blobs.  
+
+> Blob fees are deducted and burned before execution; failed transactions are not refundable.
